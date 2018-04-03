@@ -87,9 +87,11 @@ def get_current_job():
     if thread_ident in _state:
         try:
             job_id = _state.get(thread_ident)
-            return Job.objects.get(id=job_id)
+            job = Job.objects.get(id=job_id)
         except Job.DoesNotExist:
-            return
+            job = None
+
+    return job
 
 
 def get_current_heartbeat():
@@ -689,7 +691,7 @@ class Job(models.Model):
     @property
     def monitor_url_rendered(self):
         if not self.is_monitor or not self.monitor_url:
-            return
+            return None
         t = Template('{% load chroniker_tags %}' + self.monitor_url)
         ctx = Context(dict(
             # date=timezone.now(),#.strftime('%Y-%m-%d'),
@@ -705,14 +707,14 @@ class Job(models.Model):
     @property
     def progress_ratio(self):
         if not self.total_parts_complete and not self.total_parts:
-            return
+            return None
         return self.total_parts_complete / float(self.total_parts)
 
     @property
     def progress_percent(self):
         progress = self.progress_ratio
-        if progress is None:
-            return
+        if progress is not None:
+            return None
         return min(progress * 100, 100)
 
     def progress_percent_str(self):
@@ -756,7 +758,7 @@ class Job(models.Model):
             # Drop the upper and lower extremes.
             q = q[1:-1]
         if not q:
-            return
+            return None
         return int(round(sum(q) / float(len(q))))
 
     @property
@@ -766,15 +768,15 @@ class Job(models.Model):
         is complete.
         """
         if not self.is_running:
-            return
+            return None
         progress_ratio = self.progress_ratio
         if progress_ratio is None:
-            return
+            return None
         if not self.last_run_start_timestamp:
-            return
+            return None
         td = timezone.now() - self.last_run_start_timestamp
         if not progress_ratio:
-            return
+            return None
         total_sec = td.total_seconds() / progress_ratio
         remaining_sec = total_sec - td.total_seconds()
         return remaining_sec
@@ -783,7 +785,7 @@ class Job(models.Model):
     def estimated_completion_datetime(self):
         remaining_sec = self.estimated_seconds_to_completion
         if remaining_sec is None:
-            return
+            return None
         return timezone.now() + timedelta(seconds=int(remaining_sec))
 
     def estimated_completion_datetime_str(self):
@@ -821,8 +823,7 @@ class Job(models.Model):
             raise ValidationError(errors)
         super(Job, self).clean(*args, **kwargs)
 
-    def full_clean(self,
-                   exclude=None, validate_unique=None, *args, **kwargs):
+    def full_clean(self, *args, exclude=None, validate_unique=None, **kwargs):
         return self.clean(*args, **kwargs)
 
     def save(self, *args, **kwargs):
@@ -1041,7 +1042,7 @@ class Job(models.Model):
         """
         return self.is_due() and self.dependencies_met(running_ids=running_ids)
 
-    def run(self, check_running=True, force_run=False, *args, **kwargs):
+    def run(self, *args, check_running=True, force_run=False, **kwargs):
         """
         Runs this ``Job``.  A ``Log`` will be created if there is any output
         from either stdout or stderr.
@@ -1094,11 +1095,11 @@ class Job(models.Model):
         for name, value in iteritems(kwargs):
             setattr(self, name, value)
 
-    def handle_run(self,
+    def handle_run(self, *args,
                    update_heartbeat=True,
                    stdout_queue=None,
                    stderr_queue=None,
-                   *args, **kwargs):
+                   **kwargs):
         """
         This method implements the code to actually run a ``Job``.  This is
         meant to be run, primarily, by the `run_job` management command as a
@@ -1361,6 +1362,7 @@ class Job(models.Model):
         else:
             # print('Unable to update progress. No heartbeat found.')
             pass
+        return None
 
 
 class Log(models.Model):
