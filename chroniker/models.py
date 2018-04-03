@@ -2,22 +2,14 @@ from __future__ import print_function
 
 import logging
 import os
-# import re
 import socket
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import traceback
-# from functools import cmp_to_key
 from datetime import datetime, timedelta
-
-# try:
-#     from io import StringIO
-# except ImportError:
-#     from cStringIO import StringIO
-
-import threading
 
 try:
     try:
@@ -35,7 +27,6 @@ from dateutil import rrule
 import six
 from six import u, iteritems
 
-# import django
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
@@ -43,17 +34,11 @@ from django.core.management import call_command
 from django.db import models, connection, transaction
 from django.db.models import Q
 from django.template import loader, Template, Context
-# from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.utils.timesince import timeuntil
 from django.utils.translation import ungettext, ugettext, ugettext_lazy as _
-# try:
-#     from django.contrib.sites.models import get_current_site
-# except ImportError:
-#     # >= Django 1.7?
-#     from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ValidationError
 
 from toposort import toposort_flatten
@@ -64,15 +49,8 @@ from chroniker.utils import import_string
 
 from . import settings as _settings  # pylint: disable=unused-import
 
-try:
-    # >= Django 1.8
-    commit_on_success = transaction.atomic
-except AttributeError:
-    # < Django 1.8
-    commit_on_success = transaction.commit_on_success
-
+commit_on_success = transaction.atomic
 unicode = six.text_type  # pylint: disable=W0622
-
 logger = logging.getLogger('chroniker.models')
 
 _state = {}  # {thread_ident:job_id}

@@ -1,15 +1,15 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import errno
 import os
+import signal
 import sys
 import time
-import signal
 import warnings
-import errno
-from multiprocessing import Process, current_process
-from importlib import import_module
 from datetime import timedelta
+from importlib import import_module
+from multiprocessing import Process, current_process
 
 try:
     from io import StringIO
