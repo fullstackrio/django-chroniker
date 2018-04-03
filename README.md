@@ -3,7 +3,7 @@ Chroniker - Django Controlled Cron Jobs (Compatible version with Python 3 and Dj
 (Original project derived from [chrisspen/django-chroniker](https://github.com/chrisspen/django-chroniker))
 -----------------------------------------------------------
 
-[![](https://img.shields.io/pypi/v/django-chroniker.svg)](https://pypi.python.org/pypi/django-chroniker) [![Build Status](https://img.shields.io/travis/chrisspen/django-chroniker.svg?branch=master)](https://travis-ci.org/chrisspen/django-chroniker) [![](https://pyup.io/repos/github/chrisspen/django-chroniker/shield.svg)](https://pyup.io/repos/github/chrisspen/django-chroniker)
+[![](https://img.shields.io/pypi/v/django2-chroniker.svg)](https://pypi.python.org/pypi/django2-chroniker) [![Build Status](https://img.shields.io/travis/RecNes/django2-chroniker.svg?branch=master)](https://travis-ci.org/RecNes/django2-chroniker) [![](https://pyup.io/repos/github/RecNes/django2-chroniker/shield.svg)](https://pyup.io/repos/github/RecNes/django2-chroniker)
 
 Overview
 --------
