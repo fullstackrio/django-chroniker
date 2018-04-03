@@ -8,11 +8,12 @@ from functools import partial
 from multiprocessing import Queue
 from optparse import make_option
 
-import django
-import psutil
+from django import get_version as django_get_version, VERSION
 from django.core.management.base import BaseCommand
 from django.db import connection
 from django.utils import timezone
+
+import psutil
 
 from chroniker import settings as _settings
 from chroniker import utils
@@ -313,7 +314,7 @@ class Command(BaseCommand):
         from distutils.version import StrictVersion  # pylint: disable=E0611
         parser = super(Command, self).create_parser(prog_name, subcommand)
         version_threshold = StrictVersion('1.10')
-        current_version = StrictVersion(django.get_version(django.VERSION))
+        current_version = StrictVersion(django_get_version(VERSION))
         if current_version >= version_threshold:
             parser.add_argument('--update_heartbeat',
                                 dest='update_heartbeat',

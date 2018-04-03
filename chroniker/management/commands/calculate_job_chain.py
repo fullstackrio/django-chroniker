@@ -3,9 +3,9 @@ from __future__ import print_function
 import sys
 from optparse import make_option
 
-import django
-from criticalpath import Node
+from django import get_version as django_get_version, VERSION
 from django.core.management.base import BaseCommand
+from criticalpath import Node
 
 from chroniker.models import Job, JobDependency
 
@@ -28,7 +28,7 @@ class Command(BaseCommand):
         from distutils.version import StrictVersion  # pylint: disable=E0611
         parser = super(Command, self).create_parser(prog_name, subcommand)
         version_threshold = StrictVersion('1.10')
-        current_version = StrictVersion(django.get_version(django.VERSION))
+        current_version = StrictVersion(django_get_version(VERSION))
         if current_version >= version_threshold:
             parser.add_argument('root_job_id')
             parser.add_argument('--samples',
