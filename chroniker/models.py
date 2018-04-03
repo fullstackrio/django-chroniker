@@ -22,9 +22,9 @@ except ImportError:
         import dummy_thread as thread
 
 
+from datetime import datetime, timedelta
 import six
 from six import u, iteritems
-from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.sites.models import Site

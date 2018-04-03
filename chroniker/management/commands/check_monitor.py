@@ -4,27 +4,27 @@ import sys
 from optparse import make_option
 
 import django
+import six
 from django.core.management.base import BaseCommand
 
-import six
-
 from chroniker.models import get_current_job
+
 
 class Command(BaseCommand):
     help = 'Runs a specific monitoring routine.'
 
     option_list = getattr(BaseCommand, 'option_list', ()) + (
         make_option('--imports',
-            dest='imports',
-            help='Modules to import.'),
+                    dest='imports',
+                    help='Modules to import.'),
         make_option('--query',
-            dest='query',
-            help='The query to run.'),
+                    dest='query',
+                    help='The query to run.'),
         make_option('--verbose',
-            dest='verbose',
-            default=False,
-            help='If given, displays extra logging messages.'),
-        )
+                    dest='verbose',
+                    default=False,
+                    help='If given, displays extra logging messages.'),
+    )
 
     def create_parser(self, prog_name, subcommand):
         """
@@ -32,22 +32,22 @@ class Command(BaseCommand):
         Create and return the ``ArgumentParser`` which extends ``BaseCommand`` parser with
         chroniker extra args and will be used to parse the arguments to this command.
         """
-        from distutils.version import StrictVersion # pylint: disable=E0611
+        from distutils.version import StrictVersion  # pylint: disable=E0611
         parser = super(Command, self).create_parser(prog_name, subcommand)
         version_threshold = StrictVersion('1.10')
         current_version = StrictVersion(django.get_version(django.VERSION))
         if current_version >= version_threshold:
             parser.add_argument('args', nargs="*")
             parser.add_argument('--imports',
-                dest='imports',
-                help='Modules to import.')
+                                dest='imports',
+                                help='Modules to import.')
             parser.add_argument('--query',
-                dest='query',
-                help='The query to run.')
+                                dest='query',
+                                help='The query to run.')
             parser.add_argument('--verbose',
-                dest='verbose',
-                default=False,
-                help='If given, displays extra logging messages.')
+                                dest='verbose',
+                                default=False,
+                                help='If given, displays extra logging messages.')
             self.add_arguments(parser)
         return parser
 
@@ -72,7 +72,7 @@ class Command(BaseCommand):
             six.exec_(cmd)
         if verbose:
             print(query)
-        q = eval(query, globals(), locals()) # pylint: disable=W0123
+        q = eval(query, globals(), locals())  # pylint: disable=W0123
 
         job = get_current_job()
         if job:

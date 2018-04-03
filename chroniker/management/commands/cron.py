@@ -1,27 +1,26 @@
+import logging
 import os
+import socket
 import sys
 import time
-import socket
-import logging
-from functools import partial
-from optparse import make_option
 from collections import defaultdict
+from functools import partial
 from multiprocessing import Queue
+from optparse import make_option
 
+import django
+import psutil
 from django.core.management.base import BaseCommand
 from django.db import connection
-import django
-#from django.conf import settings
 from django.utils import timezone
 
-import psutil
+from chroniker import settings as _settings
+from chroniker import utils
+from chroniker.models import Job, Log
+
 
 # from six import u
 
-from chroniker.models import Job, Log
-# from chroniker import constants as c
-from chroniker import utils
-from chroniker import settings as _settings
 
 def kill_stalled_processes(dryrun=True):
     """
@@ -31,13 +30,13 @@ def kill_stalled_processes(dryrun=True):
     We compare all recorded PIDs against those still running,
     and kill any associated with complete jobs.
     """
-    pids = set(map(int, Job.objects\
-        .filter(is_running=False, current_pid__isnull=False)\
-        .exclude(current_pid='')\
-        .values_list('current_pid', flat=True)))
+    pids = set(map(int, Job.objects \
+                   .filter(is_running=False, current_pid__isnull=False) \
+                   .exclude(current_pid='') \
+                   .values_list('current_pid', flat=True)))
     for pid in pids:
         try:
-            if utils.pid_exists(pid):# and not utils.get_cpu_usage(pid):
+            if utils.pid_exists(pid):  # and not utils.get_cpu_usage(pid):
                 p = psutil.Process(pid)
                 cmd = ' '.join(p.cmdline())
                 if 'manage.py cron' in cmd:
@@ -55,14 +54,14 @@ def kill_stalled_processes(dryrun=True):
         except psutil.NoSuchProcess:
             print('PID does not exist.')
 
-class JobProcess(utils.TimedProcess):
 
+class JobProcess(utils.TimedProcess):
     def __init__(self, job, *args, **kwargs):
         super(JobProcess, self).__init__(*args, **kwargs)
         self.job = job
 
-def run_job(job, **kwargs):
 
+def run_job(job, **kwargs):
     update_heartbeat = kwargs.pop('update_heartbeat', None)
     stdout_queue = kwargs.pop('stdout_queue', None)
     stderr_queue = kwargs.pop('stderr_queue', None)
@@ -70,7 +69,7 @@ def run_job(job, **kwargs):
 
     # TODO:causes UnicodeEncodeError: 'ascii' codec can't encode
     # character u'\xa0' in position 59: ordinal not in range(128)
-    #print(u"Running Job: %i - '%s' with args: %s" \
+    # print(u"Running Job: %i - '%s' with args: %s" \
     #    % (job.id, job, job.args))
 
     # TODO:Fix? Remove multiprocess and just running all jobs serially?
@@ -91,11 +90,11 @@ def run_job(job, **kwargs):
         stderr_queue=stderr_queue,
         force_run=force_run,
     )
-    #TODO:mark job as not running if still marked?
-    #TODO:normalize job termination and cleanup outside of handle_run()?
+    # TODO:mark job as not running if still marked?
+    # TODO:normalize job termination and cleanup outside of handle_run()?
+
 
 def run_cron(jobs=None, **kwargs):
-
     update_heartbeat = kwargs.pop('update_heartbeat', True)
     force_run = kwargs.pop('force_run', False)
     dryrun = kwargs.pop('dryrun', False)
@@ -107,10 +106,10 @@ def run_cron(jobs=None, **kwargs):
         # TODO: auto-kill inactive long-running cron processes whose
         # threads have stalled and not exited properly?
         # Check for 0 cpu usage.
-        #ps -p <pid> -o %cpu
+        # ps -p <pid> -o %cpu
 
-        stdout_map = defaultdict(list) # {prod_id:[]}
-        stderr_map = defaultdict(list) # {prod_id:[]}
+        stdout_map = defaultdict(list)  # {prod_id:[]}
+        stderr_map = defaultdict(list)  # {prod_id:[]}
         stdout_queue = Queue()
         stderr_queue = Queue()
 
@@ -137,7 +136,7 @@ def run_cron(jobs=None, **kwargs):
                         sys.exit()
                     else:
                         print(('%s already exists, but contains stale '
-                            'PID, continuing') % pid_fn)
+                               'PID, continuing') % pid_fn)
                 except ValueError:
                     pass
                 except TypeError:
@@ -170,8 +169,8 @@ def run_cron(jobs=None, **kwargs):
             Job.objects.update()
             job = Job.objects.get(id=job.id)
             if not force_run and not job.is_due_with_dependencies_met(running_ids=running_ids):
-                utils.smart_print(u'Job {} {} is due but has unmet dependencies.'\
-                    .format(job.id, job))
+                utils.smart_print(u'Job {} {} is due but has unmet dependencies.' \
+                                  .format(job.id, job))
                 continue
 
             # Immediately mark the job as running so the next jobs can
@@ -259,11 +258,11 @@ def run_cron(jobs=None, **kwargs):
                             on_time=False,
                             hostname=socket.gethostname(),
                             stdout=''.join(stdout_map[proc_id]),
-                            stderr=''.join(stderr_map[proc_id]+['Job exceeded timeout\n']),
+                            stderr=''.join(stderr_map[proc_id] + ['Job exceeded timeout\n']),
                         )
 
                 time.sleep(1)
-            print('!'*80)
+            print('!' * 80)
             print('All jobs complete!')
     finally:
         if _settings.CHRONIKER_USE_PID and os.path.isfile(pid_fn) and clear_pid:
@@ -274,35 +273,35 @@ class Command(BaseCommand):
     help = 'Runs all jobs that are due.'
     option_list = getattr(BaseCommand, 'option_list', ()) + (
         make_option('--update_heartbeat',
-            dest='update_heartbeat',
-            default=1,
-            help='If given, launches a thread to asynchronously update ' + \
-                'job heartbeat status.'),
+                    dest='update_heartbeat',
+                    default=1,
+                    help='If given, launches a thread to asynchronously update ' + \
+                         'job heartbeat status.'),
         make_option('--force_run',
-            dest='force_run',
-            action='store_true',
-            default=False,
-            help='If given, forces all jobs to run.'),
+                    dest='force_run',
+                    action='store_true',
+                    default=False,
+                    help='If given, forces all jobs to run.'),
         make_option('--dryrun',
-            action='store_true',
-            default=False,
-            help='If given, only displays jobs to be run.'),
+                    action='store_true',
+                    default=False,
+                    help='If given, only displays jobs to be run.'),
         make_option('--jobs',
-            dest='jobs',
-            default='',
-            help='A comma-delimited list of job ids to limit executions to.'),
+                    dest='jobs',
+                    default='',
+                    help='A comma-delimited list of job ids to limit executions to.'),
         make_option('--name',
-            dest='name',
-            default='',
-            help='A name to give this process.'),
+                    dest='name',
+                    default='',
+                    help='A name to give this process.'),
         make_option('--sync',
-            action='store_true',
-            default=False,
-            help='If given, runs jobs one at a time.'),
+                    action='store_true',
+                    default=False,
+                    help='If given, runs jobs one at a time.'),
         make_option('--verbose',
-            action='store_true',
-            default=False,
-            help='If given, shows debugging info.'),
+                    action='store_true',
+                    default=False,
+                    help='If given, shows debugging info.'),
     )
 
     def create_parser(self, prog_name, subcommand):
@@ -311,41 +310,41 @@ class Command(BaseCommand):
         Create and return the ``ArgumentParser`` which extends ``BaseCommand`` parser with
         chroniker extra args and will be used to parse the arguments to this command.
         """
-        from distutils.version import StrictVersion # pylint: disable=E0611
+        from distutils.version import StrictVersion  # pylint: disable=E0611
         parser = super(Command, self).create_parser(prog_name, subcommand)
         version_threshold = StrictVersion('1.10')
         current_version = StrictVersion(django.get_version(django.VERSION))
         if current_version >= version_threshold:
             parser.add_argument('--update_heartbeat',
-                dest='update_heartbeat',
-                default=1,
-                help='If given, launches a thread to asynchronously update ' + \
-                    'job heartbeat status.')
+                                dest='update_heartbeat',
+                                default=1,
+                                help='If given, launches a thread to asynchronously update ' + \
+                                     'job heartbeat status.')
             parser.add_argument('--force_run',
-                dest='force_run',
-                action='store_true',
-                default=False,
-                help='If given, forces all jobs to run.')
+                                dest='force_run',
+                                action='store_true',
+                                default=False,
+                                help='If given, forces all jobs to run.')
             parser.add_argument('--dryrun',
-                action='store_true',
-                default=False,
-                help='If given, only displays jobs to be run.')
+                                action='store_true',
+                                default=False,
+                                help='If given, only displays jobs to be run.')
             parser.add_argument('--jobs',
-                dest='jobs',
-                default='',
-                help='A comma-delimited list of job ids to limit executions to.')
+                                dest='jobs',
+                                default='',
+                                help='A comma-delimited list of job ids to limit executions to.')
             parser.add_argument('--name',
-                dest='name',
-                default='',
-                help='A name to give this process.')
+                                dest='name',
+                                default='',
+                                help='A name to give this process.')
             parser.add_argument('--sync',
-                action='store_true',
-                default=False,
-                help='If given, runs jobs one at a time.')
+                                action='store_true',
+                                default=False,
+                                help='If given, runs jobs one at a time.')
             parser.add_argument('--verbose',
-                action='store_true',
-                default=False,
-                help='If given, shows debugging info.')
+                                action='store_true',
+                                default=False,
+                                help='If given, shows debugging info.')
             self.add_arguments(parser)
         return parser
 

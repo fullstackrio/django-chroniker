@@ -10,7 +10,6 @@ from datetime import timedelta
 from importlib import import_module
 from multiprocessing import Process, current_process
 
-import psutil
 from six import print_, reraise, u
 
 try:
@@ -25,6 +24,7 @@ from django.db import connection
 from django.utils import timezone
 from django.conf import settings
 from django.utils.encoding import smart_str
+import psutil
 
 from . import constants as c
 
