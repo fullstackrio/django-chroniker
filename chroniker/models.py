@@ -9,7 +9,6 @@ import tempfile
 import threading
 import time
 import traceback
-from datetime import datetime, timedelta
 
 try:
     try:
@@ -22,10 +21,10 @@ except ImportError:
     except ImportError:
         import dummy_thread as thread
 
-from dateutil import rrule
 
 import six
 from six import u, iteritems
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -40,6 +39,7 @@ from django.utils.safestring import mark_safe
 from django.utils.timesince import timeuntil
 from django.utils.translation import ungettext, ugettext, ugettext_lazy as _
 from django.core.exceptions import ValidationError
+from dateutil import rrule
 
 from toposort import toposort_flatten
 
