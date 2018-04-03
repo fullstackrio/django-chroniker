@@ -1,13 +1,8 @@
 from django.contrib import admin
 from django.contrib.admin.sites import site
 from django.contrib.admin.widgets import ManyToManyRawIdWidget, ForeignKeyRawIdWidget
-from django import VERSION
 
-if VERSION >= (2, 0, 0):
-    from django.urls import reverse
-else:
-    from django.core.urlresolvers import reverse
-
+from django.urls import reverse
 from django.forms.widgets import Select, TextInput
 
 try:
@@ -40,7 +35,7 @@ from .utils import get_admin_change_url, get_admin_changelist_url
 
 
 class LinkedSelect(Select):
-    def render(self, name, value, attrs=None, *args, **kwargs):
+    def render(self, name, value, *args, attrs=None, **kwargs):
         output = super(LinkedSelect, self).render(name, value, attrs=attrs, *args, **kwargs)
         model = self.choices.field.queryset.model
         to_field_name = self.choices.field.to_field_name or 'id'

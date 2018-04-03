@@ -36,11 +36,11 @@ setup(
             'tests/fixtures/*',
         ],
     },
-    author="Chris Spencer",
-    author_email="chrisspen@gmail.com",
+    author="Sencer Hamarat",
+    author_email="sencerhamarat@gmail.com",
     description="Easily control cron jobs via Django's admin.",
     license="BSD",
-    url="https://github.com/chrisspen/django-chroniker",
+    url="https://github.com/RecNes/django-chroniker",
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 6 - Mature',

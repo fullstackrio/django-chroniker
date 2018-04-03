@@ -1,9 +1,10 @@
 from django import template
-from django.core.urlresolvers import reverse, NoReverseMatch
+from django.urls import reverse, NoReverseMatch
 from django.utils import timezone
 from django.conf import settings
 
 register = template.Library()
+
 
 class RunJobURLNode(template.Node):
     def __init__(self, object_id):
@@ -18,6 +19,7 @@ class RunJobURLNode(template.Node):
             # New way
             url = reverse('admin:chroniker_job_run', args=(object_id,))
         return url
+
 
 def do_get_run_job_url(parser, token):
     """
@@ -35,7 +37,9 @@ def do_get_run_job_url(parser, token):
             "%r tag requires one argument" % token.contents.split()[0])
     return RunJobURLNode(object_id)
 
+
 register.tag('get_run_job_url', do_get_run_job_url)
+
 
 @register.simple_tag
 def now_offset(format_string, offset_days=0):

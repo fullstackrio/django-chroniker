@@ -18,13 +18,7 @@ except ImportError:
 
 from django.contrib.contenttypes.models import ContentType
 
-from django import VERSION
-
-if VERSION >= (2, 0, 0):
-    from django.urls import reverse
-else:
-    from django.core.urlresolvers import reverse
-
+from django.urls import reverse
 from django.db import models
 from django.db import connection
 from django.utils import timezone
@@ -63,6 +57,8 @@ def get_etc(complete_parts, total_parts, start_datetime, current_datetime=None, 
             return (etc - current_datetime).total_seconds()
 
         return etc
+
+    return None
 
 
 def get_remaining_seconds(*args, **kwargs):
@@ -305,6 +301,8 @@ def kill_process(pid):
         # Our user likely doesn't have permission to kill the process.
         return False
 
+    return None
+
 
 class TimedProcess(Process):
     """
@@ -317,7 +315,7 @@ class TimedProcess(Process):
 
     daemon = True
 
-    def __init__(self, max_seconds, time_type=c.MAX_TIME, fout=None, check_freq=1, *args, **kwargs):
+    def __init__(self, max_seconds, *args, time_type=c.MAX_TIME, fout=None, check_freq=1, **kwargs):
         super(TimedProcess, self).__init__(*args, **kwargs)
         self.fout = fout or sys.stdout
         self.t0 = time.clock()
@@ -332,7 +330,7 @@ class TimedProcess(Process):
         self._process_times = {}  # {pid:user_seconds}
         self._last_duration_seconds = None
 
-    def terminate(self, sig=15, *args, **kwargs):
+    def terminate(self, *args, sig=15, **kwargs):
         """
         sig := 6=abrt, 9=kill, 15=term
         """
@@ -441,6 +439,7 @@ class TimedProcess(Process):
                 return self.get_duration_seconds_max()
             else:
                 raise NotImplementedError
+        return None
 
     @property
     def is_expired(self):
@@ -456,6 +455,7 @@ class TimedProcess(Process):
     def start(self, *args, **kwargs):
         super(TimedProcess, self).start(*args, **kwargs)
         self._p = psutil.Process(self.pid)
+        return None
 
     def start_then_kill(self, verbose=True):
         """
@@ -492,7 +492,7 @@ def make_naive(dt, tz):
 
 def make_aware(dt, tz):
     if dt is None:
-        return
+        return None
     elif settings.USE_TZ:
         if timezone.is_aware(dt):
             return dt

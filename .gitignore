@@ -55,6 +55,7 @@ docs/_build/
 
 # Local virtualenvs used for testing.
 /.env*
+env/
 
 # PIP install version files.
 /=*

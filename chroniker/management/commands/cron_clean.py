@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from chroniker.models import Log
 
+
 class Command(BaseCommand):
     help = 'Deletes old job logs.'
 
@@ -15,7 +16,7 @@ class Command(BaseCommand):
             sys.stderr.write(
                 'Command requires two arguments. '
                 'Unit (weeks, days, hours or minutes) and interval.\n')
-            return
+            return None
         else:
             unit = str(args[0])
             if unit not in ['weeks', 'days', 'hours', 'minutes']:
@@ -29,3 +30,4 @@ class Command(BaseCommand):
         kwargs = {unit: amount}
         time_ago = timezone.now() - timedelta(**kwargs)
         Log.cleanup(time_ago)
+        return None

@@ -1,20 +1,11 @@
 from __future__ import print_function
 
-# from distutils.version import StrictVersion
-
-# DJANGO_VERSION = StrictVersion(django.get_version())
-from django import VERSION
 from django import forms
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib import admin
 from django.core.management import get_commands
-
-if VERSION >= (2, 0, 0):
-    from django.urls import reverse, NoReverseMatch
-else:
-    from django.core.urlresolvers import reverse, NoReverseMatch
-
+from django.urls import reverse, NoReverseMatch
 from django.db import models
 from django.forms import TextInput
 from django.shortcuts import render_to_response
@@ -44,7 +35,7 @@ class HTMLWidget(forms.Widget):
         self.rel = rel
         super(HTMLWidget, self).__init__(attrs)
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, *args, attrs=None):
         if self.rel is not None:
             key = self.rel.get_related_field().name
             obj = self.rel.to._default_manager.get(**{key: value})
