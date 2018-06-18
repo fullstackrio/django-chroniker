@@ -691,7 +691,7 @@ class Job(models.Model):
     @property
     def progress_percent(self):
         progress = self.progress_ratio
-        if progress is not None:
+        if progress is None:
             return None
         return min(progress * 100, 100)
 
