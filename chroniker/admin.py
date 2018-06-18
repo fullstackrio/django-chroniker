@@ -636,7 +636,7 @@ class LogAdmin(admin.ModelAdmin):
             return db_field.formfield(**kwargs)
 
         if isinstance(db_field, models.ForeignKey):
-            kwargs['widget'] = HTMLWidget(db_field.rel)
+            kwargs['widget'] = HTMLWidget(db_field.remote_field)
             return db_field.formfield(**kwargs)
 
         return super(LogAdmin, self).formfield_for_dbfield(db_field, **kwargs)
