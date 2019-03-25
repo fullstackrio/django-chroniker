@@ -35,7 +35,7 @@ from .utils import get_admin_change_url, get_admin_changelist_url
 
 
 class LinkedSelect(Select):
-    def render(self, name, value, *args, attrs=None, **kwargs):
+    def render(self, name, value, *args, attrs=None, renderer=None, **kwargs):
         output = super(LinkedSelect, self).render(name, value, attrs=attrs, *args, **kwargs)
         model = self.choices.field.queryset.model
         to_field_name = self.choices.field.to_field_name or 'id'
@@ -64,7 +64,7 @@ class ForeignKeyTextInput(TextInput):
         if q.count():
             self._instance = q[0]
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         from django.template import Context, Template
         from django.template.context import Context
         if value is None:
