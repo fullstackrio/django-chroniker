@@ -715,3 +715,4 @@ class JobTestCase(TestCase):
     def test_widgets(self):
         print('django.version:', django.VERSION)
         from chroniker import widgets
+        

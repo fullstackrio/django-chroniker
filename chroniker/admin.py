@@ -35,7 +35,7 @@ class HTMLWidget(forms.Widget):
         self.rel = rel
         super(HTMLWidget, self).__init__(attrs)
 
-    def render(self, name, value, *args, attrs=None):
+    def render(self, name, value, *args, attrs=None, renderer=None):
         if self.rel is not None:
             key = self.rel.get_related_field().name
             obj = self.rel.model._default_manager.get(**{key: value})
