@@ -43,10 +43,7 @@ class HTMLWidget(forms.Widget):
     def render(self, name, value, attrs=None, renderer=None):
         if self.rel is not None:
             key = self.rel.get_related_field().name
-            if hasattr(self.rel, 'related_model'):
-                related_model = self.rel.related_model
-            else:
-                related_model = self.rel.to
+            related_model = self.rel.model
             obj = related_model._default_manager.get(**{key: value})
             related_url = '../../../%s/%s/%d/' % (
                 related_model._meta.app_label,
