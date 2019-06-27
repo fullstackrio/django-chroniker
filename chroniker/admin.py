@@ -45,7 +45,7 @@ class HTMLWidget(forms.Widget):
             key = self.rel.get_related_field().name
             related_model = self.rel.model
             obj = related_model._default_manager.get(**{key: value})
-            related_url = '../../../%s/%s/%d/' % (
+            related_url = '../../../../%s/%s/%d/' % (
                 related_model._meta.app_label,
                 related_model._meta.object_name.lower(),
                 value)
